@@ -21,7 +21,7 @@ try {
      * Enable debug logging mechanism if timing is enabled
      */
     if ($settings->get('enable_timing')) {
-        SpotDebug::enable(SpotDebug::TRACE, $daoFactory->getDebugLogDao());
+        SpotDebug::enable(SpotDebug::TRACE);
     } # if
 
 	# helper functions for passed variables
@@ -190,7 +190,9 @@ try {
 						  'maxage' => $req->getDef('maxage', ''),
 						  'offset' => $req->getDef('offset', ''),
 						  'del' => $req->getDef('del', ''),
-                          'spotcat' => $req->getDef('spotcat', '')
+                          'spotcat' => $req->getDef('spotcat', ''),
+                          'noalt' => $req->getDef('noalt', ''),
+                          'poster' => $req->getDef('poster', '')
 					)
 			);
 			$page->render();

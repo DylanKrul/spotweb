@@ -416,7 +416,7 @@ class Dao_Base_Spot implements Dao_Spot {
 														subcatb, subcatc, subcatd, subcatz, stamp, reversestamp, filesize, spotterid) 
 									VALUES",
                                   array(PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_INT, PDO::PARAM_STR,
-                                        PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_INT, PDO::PARAM_INT,
+                                        PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_INT, PDO::PARAM_STR,
                                         PDO::PARAM_INT, PDO::PARAM_STR),
 								  array('messageid', 'poster', 'title', 'tag', 'category', 'subcata', 'subcatb', 'subcatc',
 								  		'subcatd', 'subcatz', 'stamp', 'reversestamp', 'filesize', 'spotterid')
@@ -459,14 +459,14 @@ class Dao_Base_Spot implements Dao_Spot {
 		 * Prepare the array for insertion
 		 */
 		foreach($fullSpots as &$fullSpot) {
-			$fullSpot['verified'] = (bool) $fullSpot['verified'];
+			$fullSpot['verified'] = (int) $fullSpot['verified'];
 			$fullSpot['user-key'] = base64_encode(serialize($fullSpot['user-key']));
 		} # foreach
 
 		$this->_conn->batchInsert($fullSpots,
 								  "INSERT INTO spotsfull(messageid, verified, usersignature, userkey, xmlsignature, fullxml)
 								  	VALUES",
-                                  array(PDO::PARAM_STR, PDO::PARAM_BOOL, PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR),
+                                  array(PDO::PARAM_STR, PDO::PARAM_INT, PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR, PDO::PARAM_STR),
 								  array('messageid', 'verified', 'user-signature', 'user-key', 'xml-signature', 'fullxml')
 								  );
 

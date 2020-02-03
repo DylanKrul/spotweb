@@ -42,12 +42,13 @@ class dbfts_sqlite extends dbfts_abs {
 			 * ambiguity
 			 */
 			$tmpField = explode('.', $searchItem['fieldname']);
-			$matchList[] = $searchValue;
+			$field = $tmpField[1];
+			$matchList[] = $field . ':' . substr($this->_db->safe($searchValue), 1, -1);
 		} # foreach
 		
 		# add one WHERE MATCH conditions with all conditions
 
-        $filterValueSql[] =  '(idx_fts_spots_'. $idxnum .'.docid = s.rowid) AND ' . " (idx_fts_spots_" . $idxnum . ".". $columnField . " MATCH '" . implode(' ', $matchList) . "') ";
+        $filterValueSql[] =  '(idx_fts_spots_'. $idxnum .'.rowid = s.rowid) AND ' . " (idx_fts_spots_" . $idxnum . ".". $columnField . " MATCH '" . implode(' ', $matchList) . "') ";
 		
 		SpotTiming::stop(__CLASS__ . '::' . __FUNCTION__, array($filterValueSql,$additionalTables));
 

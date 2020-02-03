@@ -87,11 +87,11 @@ class Services_Upgrade_Users {
 		} # if
 
 		# Retrieve the actual userid
-		$user = $this->_userDao->getUser($userId);
+		$userarr = $this->_userDao->getUser($userId);
 
 		# update the password
-		$user['passhash'] = $this->passToHash($password);
-		$this->_userDao->setUserPassword($user);
+		$userarr['passhash'] = $this->passToHash($password);
+		$this->_userDao->setUserPassword($userarr);
 	} # resetUserPassword
 	/*
 	 * Create the admin user 
@@ -260,10 +260,11 @@ class Services_Upgrade_Users {
 			$this->setSettingIfNot($user['prefs']['nzbhandling'], 'command', '');
 			$this->setSettingIfNot($user['prefs']['nzbhandling']['sabnzbd'], 'url', '');
 			$this->setSettingIfNot($user['prefs']['nzbhandling']['sabnzbd'], 'apikey', '');
-            $this->setSettingIfNot($user['prefs']['nzbhandling']['sabnzbd'], 'username', '');
-            $this->setSettingIfNot($user['prefs']['nzbhandling']['sabnzbd'], 'password', '');
+            		$this->setSettingIfNot($user['prefs']['nzbhandling']['sabnzbd'], 'username', '');
+            		$this->setSettingIfNot($user['prefs']['nzbhandling']['sabnzbd'], 'password', '');
 			$this->setSettingIfNot($user['prefs']['nzbhandling']['nzbget'], 'host', '');
 			$this->setSettingIfNot($user['prefs']['nzbhandling']['nzbget'], 'port', '');
+			$this->setSettingIfNot($user['prefs']['nzbhandling']['nzbget'], 'ssl', '');
 			$this->setSettingIfNot($user['prefs']['nzbhandling']['nzbget'], 'username', '');
 			$this->setSettingIfNot($user['prefs']['nzbhandling']['nzbget'], 'password', '');
 			$this->setSettingIfNot($user['prefs']['nzbhandling']['nzbget'], 'timeout', 15);
@@ -275,8 +276,8 @@ class Services_Upgrade_Users {
 			$this->setSettingIfNot($user['prefs']['notifications']['growl'], 'host', '');
 			$this->setSettingIfNot($user['prefs']['notifications']['growl'], 'password', '');
 			$this->setSettingIfNot($user['prefs']['notifications']['nma'], 'api', '');
-			$this->setSettingIfNot($user['prefs']['notifications']['notifo'], 'username', '');
-			$this->setSettingIfNot($user['prefs']['notifications']['notifo'], 'api', '');
+			/* Notifo is discontinued. */
+			$this->unsetSetting($user['prefs']['notifications'], 'notifo');
 			$this->setSettingIfNot($user['prefs']['notifications']['prowl'], 'apikey', '');
 			$this->setSettingIfNot($user['prefs']['notifications']['twitter'], 'screen_name', '');
 			$this->setSettingIfNot($user['prefs']['notifications']['twitter'], 'request_token', '');
@@ -400,7 +401,6 @@ class Services_Upgrade_Users {
 			$dbCon->rawExec("INSERT INTO grouppermissions(groupid,permissionid) VALUES(3, " . SpotSecurity::spotsec_send_notifications_services . ")");
 			$dbCon->rawExec("INSERT INTO grouppermissions(groupid,permissionid, objectid) VALUES(2, " . SpotSecurity::spotsec_send_notifications_services . ", 'welcomemail')");
 			$dbCon->rawExec("INSERT INTO grouppermissions(groupid,permissionid, objectid) VALUES(3, " . SpotSecurity::spotsec_send_notifications_services . ", 'email')");
-			$dbCon->rawExec("INSERT INTO grouppermissions(groupid,permissionid, objectid) VALUES(3, " . SpotSecurity::spotsec_send_notifications_services . ", 'notifo')");
 			$dbCon->rawExec("INSERT INTO grouppermissions(groupid,permissionid, objectid) VALUES(3, " . SpotSecurity::spotsec_send_notifications_services . ", 'twitter')");
 			$dbCon->rawExec("INSERT INTO grouppermissions(groupid,permissionid, objectid) VALUES(3, " . SpotSecurity::spotsec_send_notifications_services . ", 'prowl')");
 			$dbCon->rawExec("INSERT INTO grouppermissions(groupid,permissionid, objectid) VALUES(3, " . SpotSecurity::spotsec_send_notifications_services . ", 'nma')");
@@ -467,6 +467,13 @@ class Services_Upgrade_Users {
 		if (($forceReset) || ($this->_settings->get('securityversion') < 0.32)) {
 			$dbCon->rawExec("INSERT INTO grouppermissions(groupid,permissionid, objectid) VALUES(4, " . SpotSecurity::spotsec_download_integration . ", 'nzbvortex')");
 		} # if
+
+		########################################################################
+		# Security level 0.33
+		########################################################################
+		if (($forceReset) || ($this->_settings->get('securityversion') < 0.33)) {
+			$dbCon->rawExec("DELETE FROM grouppermissions WHERE objectid = 'notifo';");
+		}
 
 	} # updateSecurityGroups
 

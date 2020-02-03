@@ -21,6 +21,28 @@ class SpotStruct_mysql extends SpotStruct_abs {
         $this->_dbcon->rawExec("ANALYZE TABLE moderatedringbuffer");
         $this->_dbcon->rawExec("ANALYZE TABLE usenetstate");
 	} # analyze
+	
+	function resetdb() { 		
+		$this->_dbcon->rawExec("SET FOREIGN_KEY_CHECKS = 0");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spots");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotsposted");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotsfull");
+		$this->_dbcon->rawExec("TRUNCATE TABLE commentsxover");
+		$this->_dbcon->rawExec("TRUNCATE TABLE commentsfull");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotstatelist");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotteridblacklist");
+		$this->_dbcon->rawExec("TRUNCATE TABLE filtercounts");	
+		$this->_dbcon->rawExec("TRUNCATE TABLE reportsposted");
+		$this->_dbcon->rawExec("TRUNCATE TABLE reportsxover");
+		$this->_dbcon->rawExec("TRUNCATE TABLE cache");
+        $this->_dbcon->rawExec("TRUNCATE TABLE moderatedringbuffer");
+        $this->_dbcon->rawExec("TRUNCATE TABLE usenetstate");
+		$this->_dbcon->rawExec("SET FOREIGN_KEY_CHECKS = 1");
+	} # resetdb
+	
+	function clearcache() { 		
+		$this->_dbcon->rawExec("TRUNCATE TABLE cache");
+	} # clearcache
 
     /*
      * Returns a database specific representation of a boolean value
@@ -40,9 +62,9 @@ class SpotStruct_mysql extends SpotStruct_abs {
 	function swDtToNative($colType) {
 		switch(strtoupper($colType)) {
 			case 'INTEGER'				: $colType = 'int(11)'; break;
-			case 'UNSIGNED INTEGER'		: $colType = 'int(10) unsigned'; break;
+			case 'INTEGER UNSIGNED'		: $colType = 'int(10) unsigned'; break;
 			case 'BIGINTEGER'			: $colType = 'bigint(20)'; break;
-			case 'UNSIGNED BIGINTEGER'	: $colType = 'bigint(20) unsigned'; break;
+			case 'BIGINTEGER UNSIGNED'	: $colType = 'bigint(20) unsigned'; break;
 			case 'BOOLEAN'				: $colType = 'tinyint(1)'; break;
 			case 'MEDIUMBLOB'			: $colType = 'mediumblob'; break;
 		} # switch
@@ -57,9 +79,9 @@ class SpotStruct_mysql extends SpotStruct_abs {
 	function nativeDtToSw($colInfo) {
 		switch(strtolower($colInfo)) {
 			case 'int(11)'				: $colInfo = 'INTEGER'; break;
-			case 'int(10) unsigned'		: $colInfo = 'UNSIGNED INTEGER'; break;
+			case 'int(10) unsigned'		: $colInfo = 'INTEGER UNSIGNED'; break;
 			case 'bigint(20)'			: $colInfo = 'BIGINTEGER'; break;
-			case 'bigint(20) unsigned'	: $colInfo = 'UNSIGNED BIGINTEGER'; break;
+			case 'bigint(20) unsigned'	: $colInfo = 'BIGINTEGER UNSIGNED'; break;
 			case 'tinyint(1)'			: $colInfo = 'BOOLEAN'; break;
 			case 'mediumblob'			: $colInfo = 'MEDIUMBLOB'; break;
 		} # switch
@@ -106,7 +128,7 @@ class SpotStruct_mysql extends SpotStruct_abs {
 		foreach($colList as $num => $col) {
 			$indexInfo = $this->getIndexInfo($ftsname . '_' . $num, $tablename);
 			
-			if ((empty($indexInfo)) || (strtolower($indexInfo[0]['column_name']) != strtolower($col))) {
+			if ((empty($indexInfo)) || (strtolower($indexInfo[0]['COLUMN_NAME']) != strtolower($col))) {
 				return false;
 			} # if
 		} # foreach
@@ -119,7 +141,7 @@ class SpotStruct_mysql extends SpotStruct_abs {
 		foreach($colList as $num => $col) {
 			$indexInfo = $this->getIndexInfo($ftsname . '_' . $num, $tablename);
 			
-			if ((empty($indexInfo)) || (strtolower($indexInfo[0]['column_name']) != strtolower($col))) {
+			if ((empty($indexInfo)) || (strtolower($indexInfo[0]['COLUMN_NAME']) != strtolower($col))) {
 				$this->dropIndex($ftsname . '_' . $num, $tablename);
 				$this->addIndex($ftsname . '_' . $num, 'FULLTEXT', $tablename, array($col));
 			} # if
@@ -177,6 +199,7 @@ class SpotStruct_mysql extends SpotStruct_abs {
 			# change the collation to a MySQL type
 			switch(strtolower($collation)) {
 				case 'utf8'			: $colSetting = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci'; break;
+				case 'utf8mb4'		: $colSetting = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci'; break;
 				case 'ascii'		: $colSetting = 'CHARACTER SET ascii'; break;
 				case 'ascii_bin'	: $colSetting = 'CHARACTER SET ascii COLLATE ascii_bin'; break;
 				case ''				: $colSetting = ''; break;
@@ -207,6 +230,7 @@ class SpotStruct_mysql extends SpotStruct_abs {
 		# change the collation to a MySQL type
 		switch(strtolower($collation)) {
 			case 'utf8'			: $colSetting = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci'; break;
+			case 'utf8mb4'		: $colSetting = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci'; break;
 			case 'ascii'		: $colSetting = 'CHARACTER SET ascii'; break;
 			case 'ascii_bin'	: $colSetting = 'CHARACTER SET ascii COLLATE ascii_bin'; break;
 			case ''				: $colSetting = ''; break;
@@ -343,6 +367,7 @@ class SpotStruct_mysql extends SpotStruct_abs {
 					case 'ascii_bin'			: $q['COLLATION_NAME'] = 'ascii_bin'; break;
 					case 'utf8_unicode_ci'		: $q['COLLATION_NAME'] = 'utf8'; break;
 					case 'utf8_general_ci'		: $q['COLLATION_NAME'] = 'utf8'; break;
+                    case 'utf8mb4_general_ci'   : $q['COLLATION_NAME'] = 'utf8mb4'; break;
 
 					default 					: throw new Exception("Invalid collation setting for varchar: " . $q['COLLATION_NAME']);
 				} # switch
@@ -352,6 +377,10 @@ class SpotStruct_mysql extends SpotStruct_abs {
 			if ((strlen($q['COLUMN_DEFAULT']) == 0) && (is_string($q['COLUMN_DEFAULT']))) {	
 				$q['COLUMN_DEFAULT'] = "''";
 			} # if
+            // MariaDb 10.4 returns null as string
+            if ($q['COLUMN_DEFAULT'] == "NULL") {
+                $q['COLUMN_DEFAULT'] = null;
+            }
 		} # if
 		
 		return $q;

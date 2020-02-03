@@ -31,6 +31,18 @@ abstract class SpotStruct_abs {
 	 * This function does not modify any schema or data
 	 */
 	abstract function analyze();
+	
+	/* 
+	 * This will reset the following table's: spots, spotsfull, spotsposted, 
+	 * spotstatelist, commentsfull, commentsposted, commentsxover, moderatedringbuffer, 
+	 * reportsposted, reportsxover, usenetstate, cache
+	 */
+	abstract function resetdb();
+	
+	/* 
+	 * Clearcache / clear the database table cache.
+	 */
+	abstract function clearcache();
 
 	/*
 	 * Converts a 'spotweb' internal datatype to a 
@@ -211,7 +223,7 @@ abstract class SpotStruct_abs {
 	function compareIndex($idxname, $type, $tablename, $colList) {
 		# Retrieve index information
 		$q = $this->getIndexInfo($idxname, $tablename);
-		
+      
 		# If the amount of columns in the index don't match...
 		if (count($q) != count($colList)) {
 			return false;
@@ -223,16 +235,16 @@ abstract class SpotStruct_abs {
 		 */
 		for($i = 0; $i < count($colList); $i++) {
 			$same = true;
-			
-			if ($colList[$i] != $q[$i]['column_name']) {
+            $qUpper=array_change_key_case($q[$i], CASE_UPPER);
+			if ($colList[$i] != $qUpper['COLUMN_NAME']) {
 				$same = false;
 			} # if
 
 			if ($same) {
 				switch(strtolower($type)) {
 					case 'fulltext'		: $same = (strtolower($q[$i]['index_type']) == 'fulltext'); break;
-					case 'unique'		: $same = ($q[$i]['non_unique'] == 0); break;
-					case ''				: $same = (strtolower($q[$i]['index_type']) != 'fulltext') && ($q[$i]['non_unique'] == 1);
+					case 'unique'		: $same = ($qUpper['NON_UNIQUE'] == 0); break;
+					case ''				: $same = (strtolower($q[$i]['index_type']) != 'fulltext') && ($qUpper['NON_UNIQUE'] == 1);
 				} # switch
 			} # if
 			
@@ -263,7 +275,8 @@ abstract class SpotStruct_abs {
 		 * and properties of each index.
 		 */
 		for($i = 0; $i < count($colList); $i++) {
-			if ($colList[$i + 1] != $q[$i]['column_name']) {
+            $qUpper=array_change_key_case($q[$i], CASE_UPPER);
+			if ($colList[$i + 1] != $qUpper['COLUMN_NAME']) {
 				return false;
 			} # if
 		} # for
@@ -351,15 +364,15 @@ abstract class SpotStruct_abs {
 		$this->validateColumn('subcatc', 'spots', 'VARCHAR(64)', NULL, false, 'ascii'); 
 		$this->validateColumn('subcatd', 'spots', 'VARCHAR(64)', NULL, false, 'ascii'); 
 		$this->validateColumn('subcatz', 'spots', 'VARCHAR(64)', NULL, false, 'ascii'); 
-		$this->validateColumn('stamp', 'spots', 'UNSIGNED INTEGER', NULL, false, '');
+		$this->validateColumn('stamp', 'spots', 'INTEGER UNSIGNED', NULL, false, '');
 		$this->validateColumn('reversestamp', 'spots', 'INTEGER', "0", false, '');
-		$this->validateColumn('filesize', 'spots', 'UNSIGNED BIGINTEGER', "0", true, '');
+		$this->validateColumn('filesize', 'spots', 'BIGINTEGER UNSIGNED', "0", true, '');
 		$this->validateColumn('moderated', 'spots', 'BOOLEAN', NULL, false, '');
 		$this->validateColumn('commentcount', 'spots', 'INTEGER', "0", false, '');
 		$this->validateColumn('spotrating', 'spots', 'INTEGER', "0", false, '');
 		$this->validateColumn('reportcount', 'spots', 'INTEGER', "0", false, '');
 		$this->validateColumn('spotterid', 'spots', 'VARCHAR(32)', NULL, false, 'ascii_bin'); 
-		$this->validateColumn('editstamp', 'spots', 'UNSIGNED INTEGER', NULL, false, '');
+		$this->validateColumn('editstamp', 'spots', 'INTEGER UNSIGNED', NULL, false, '');
 		$this->validateColumn('editor', 'spots', "VARCHAR(128)", NULL, false, 'utf8');
 		$this->alterStorageEngine("spots", "MyISAM");
 		
@@ -388,7 +401,7 @@ abstract class SpotStruct_abs {
 		$this->validateColumn('nntpref', 'commentsxover', 'VARCHAR(128)', "''", true, 'ascii');
 		$this->validateColumn('spotrating', 'commentsxover', 'INTEGER', "0", false, '');
 		$this->validateColumn('moderated', 'commentsxover', 'BOOLEAN', NULL, false, '');
-		$this->validateColumn('stamp', 'commentsxover', 'UNSIGNED INTEGER', NULL, false, '');
+		$this->validateColumn('stamp', 'commentsxover', 'INTEGER UNSIGNED', NULL, false, '');
 		$this->alterStorageEngine("commentsxover", "InnoDB");
 
 		# ---- reportsxover table ---- #
@@ -444,12 +457,12 @@ abstract class SpotStruct_abs {
 		$this->createTable('spotsposted', "utf8"); 
 		$this->validateColumn('messageid', 'spotsposted', 'VARCHAR(128)', "''", true, 'ascii');
 		$this->validateColumn('ouruserid', 'spotsposted', 'INTEGER', "0", true, '');
-		$this->validateColumn('stamp', 'spotsposted', 'UNSIGNED INTEGER', NULL, false, '');
+		$this->validateColumn('stamp', 'spotsposted', 'INTEGER UNSIGNED', NULL, false, '');
 		$this->validateColumn('title', 'spotsposted', 'VARCHAR(128)', NULL, false, 'utf8');
 		$this->validateColumn('tag', 'spotsposted', 'VARCHAR(128)', NULL, false, 'utf8');
 		$this->validateColumn('category', 'spotsposted', 'INTEGER', NULL, false, '');
 		$this->validateColumn('subcats', 'spotsposted', 'VARCHAR(255)', NULL, false, 'ascii'); 
-		$this->validateColumn('filesize', 'spotsposted', 'UNSIGNED BIGINTEGER', "0", true, '');
+		$this->validateColumn('filesize', 'spotsposted', 'BIGINTEGER UNSIGNED', "0", true, '');
 		$this->validateColumn('fullxml', 'spotsposted', 'TEXT', NULL, false, 'utf8');
 		$this->alterStorageEngine("spotsposted", "InnoDB");
 		
@@ -647,14 +660,6 @@ abstract class SpotStruct_abs {
 		$this->validateColumn('ipaddr', 'permaudit', "VARCHAR(45)", "''", true, 'ascii');
 		$this->alterStorageEngine("permaudit", "InnoDB");
 
-        # ---- debuglog table ---- #
-        $this->createTable('debuglog', "ascii");
-        $this->validateColumn('stamp', 'debuglog', 'INTEGER', "0", true, '');
-        $this->validateColumn('microtime', 'debuglog', 'VARCHAR(16)', "0", true, '');
-        $this->validateColumn('level', 'debuglog', 'INTEGER', "0", true, '');
-        $this->validateColumn('message', 'debuglog', 'TEXT', NULL, false, 'ascii');
-        $this->alterStorageEngine("debuglog", "InnoDB");
-
         ##############################################################################################
 		### Remove old sessions ######################################################################
 		##############################################################################################
@@ -818,7 +823,8 @@ abstract class SpotStruct_abs {
         ##############################################################################################
         # Drop old tables ############################################################################
         ##############################################################################################
-        $this->dropTable("nntp");
+		$this->dropTable("nntp");
+		$this->dropTable("debuglog");
 
 		# update the database with this specific schemaversion
 		$this->_dbcon->rawExec("DELETE FROM settings WHERE name = 'schemaversion'", array());

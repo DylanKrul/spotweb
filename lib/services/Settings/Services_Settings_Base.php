@@ -36,6 +36,11 @@ class Services_Settings_Base {
 		$settings['nntp_hdr']['enc'] = (isset($settings['nntp_hdr']['enc']['switch'])) ? $settings['nntp_hdr']['enc']['select'] : false;
 		$settings['nntp_post']['enc'] = (isset($settings['nntp_post']['enc']['switch'])) ? $settings['nntp_post']['enc']['select'] : false;
 
+        # Get the given value for NNTP encryption validate name
+		$settings['nntp_nzb']['verifyname'] = (isset($settings['nntp_nzb']['verifyname']['switch'])) ? true : false;
+        $settings['nntp_hdr']['verifyname'] = (isset($settings['nntp_hdr']['verifyname']['switch'])) ? true : false;
+        $settings['nntp_post']['verifyname'] = (isset($settings['nntp_post']['verifyname']['switch'])) ? true : false;
+
 		# Trim human-entered text fields
 		$settings['nntp_nzb']['host'] = trim($settings['nntp_nzb']['host']);
 		$settings['nntp_hdr']['host'] = trim($settings['nntp_hdr']['host']);
@@ -104,6 +109,7 @@ class Services_Settings_Base {
 		$settings['external_blacklist'] = (isset($settings['external_blacklist'])) ? true : false;
 		$settings['external_whitelist'] = (isset($settings['external_whitelist'])) ? true : false;
 		$settings['imageover_subcats'] = (isset($settings['imageover_subcats'])) ? true : false;
+		$settings['highlight'] = (isset($settings['highlight'])) ? true : false;
 
 		# Default server settings if they won't be used
 		if (!isset($settings['nntp_hdr']['use'])) { 
@@ -112,7 +118,8 @@ class Services_Settings_Base {
 										  'pass' => '', 
 										  'enc' => false, 
 										  'port' => 119, 
-										  'buggy' => false); 
+										  'buggy' => false,
+                                          'verifyname' => true); 
 		} # if
 										
 		if (!isset($settings['nntp_post']['use'])) { 
@@ -121,7 +128,8 @@ class Services_Settings_Base {
 										   'pass' => '', 
 										   'enc' => false, 
 										   'port' => 119, 
-										   'buggy' => false); 
+										   'buggy' => false,
+                                           'verifyname' => true); 
 		} # if
 
 		/* 

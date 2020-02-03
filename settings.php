@@ -72,7 +72,8 @@ $settings['sabnzbd']['categories'] = Array(
 					 'a5'		=> "books",
 					 'd2'		=> "anime",
 					 'd11'		=> "tv",
-					 'd29'		=> "anime"),
+					 'd29'		=> "anime",
+					 'z3'		=> "erotica"),
 		1	=> Array('default'	=> 'music'),
 		2	=> Array('default'	=> 'games'),
 		3	=> Array('default'	=> 'apps',
@@ -141,11 +142,17 @@ if ((!is_readable($settings['openssl_cnf_path'])) && (extension_loaded("openssl"
  * in notifications to users.
  * Determine the Spotweb url
  * use HTTPS in case of HTTPS in server vars or ssloveride in ownsettings or HTTP_X_SSL in server vars
+ * For use of an nginx reverse proxy x_forwarded_uri $request_uri can be added if the location differs from the default location
  */
+if (!isset($_SERVER['HTTP_X_FORWARDED_URI'])) {
+	$loc = (dirname($_SERVER['PHP_SELF']) != '/' && dirname($_SERVER['PHP_SELF']) != '\\' ? dirname($_SERVER['PHP_SELF']). '/' : '/');
+} else {
+	$loc = ($_SERVER['HTTP_X_FORWARDED_URI'] != '/' && $_SERVER['HTTP_X_FORWARDED_URI'] != '\\' ? $_SERVER['HTTP_X_FORWARDED_URI']. '/' : '/');
+}
 $ssloverride = (isset($settings['ssloverride']) ? $settings['ssloverride'] : false);
 $httpxssl = isset($_SERVER['HTTP_X_SSL']);
 if (isset($_SERVER['SERVER_PROTOCOL'])) {
-    $nwsetting = (((isset($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == 'on') or ($ssloverride == true) or ($httpxssl == true)) ? 'https' : 'http') . '://' . @$_SERVER['HTTP_HOST'] . (dirname($_SERVER['PHP_SELF']) != '/' && dirname($_SERVER['PHP_SELF']) != '\\' ? dirname($_SERVER['PHP_SELF']). '/' : '/');	
+    $nwsetting = (((isset($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == 'on') or ($ssloverride == true) or ($httpxssl == true)) ? 'https' : 'http') . '://' . @$_SERVER['HTTP_HOST'] . $loc;	
 } else {
     $nwsetting = 'http://mijnuniekeservernaam/spotweb/';
 } # if

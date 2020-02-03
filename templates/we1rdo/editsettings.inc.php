@@ -16,6 +16,16 @@
     $nntp_hdr = $this->_settings->get('nntp_hdr');
     $nntp_post = $this->_settings->get('nntp_post');
 
+    if (!isset($nntp_nzb['verifyname'])) {
+        $nntp_nzb['verifyname'] = true;
+    }
+    if (!isset($nntp_hdr['verifyname'])) {
+        $nntp_nzb['verifyname'] = true;
+    }
+    if (!isset($nntp_post['verifyname'])) {
+        $nntp_nzb['verifyname'] = true;
+    }
+
     $tmpArDiff = array_diff_assoc($nntp_hdr, $nntp_nzb);
     if ((empty($tmpArDiff)) || (empty($nntp_hdr['host']))) {
         $nntp_hdr['isadummy'] = true;
@@ -42,10 +52,8 @@
 	
 	<div id="editsettingstab" class="ui-tabs">
 		<ul>
-<?php if ($tplHelper->allowed(SpotSecurity::spotsec_view_spotweb_updates, '')) { ?>
-			<li><a href="?page=versioncheck" title="<?php echo _('Spotweb updates'); ?>"><span><?php echo _('Spotweb updates');?></span></a></li>
-<?php }
-if ($tplHelper->allowed(SpotSecurity::spotsec_edit_settings, '')) { ?>
+
+<?php if ($tplHelper->allowed(SpotSecurity::spotsec_edit_settings, '')) { ?>
 			<li><a href="#editsettingstab-1"><span><?php echo _('General'); ?></span></a></li>
 			<li><a href="#editsettingstab-2"><span><?php echo _('Newsservers'); ?></span></a></li>
 			<li><a href="#editsettingstab-3"><span><?php echo _('Retrieve'); ?></span></a></li>
@@ -72,13 +80,11 @@ if ($tplHelper->allowed(SpotSecurity::spotsec_edit_settings, '')) { ?>
 
                     <!-- Add some explanation about the MS translator API -->
                     <p>
-                        <?php echo _('Spotweb can use the Microsoft Translator API to translate comments and Spot description to the users native language. This requires a so-called Client ID and a SecretID which you need to <a href="http://blogs.msdn.com/b/translation/p/gettingstarted1.aspx">request at Microsoft</a>. Please enter the values in below fields.'); ?>
+                        <?php echo _('Spotweb can use the Microsoft Translator API to translate comments and Spot description to the users native language. This requires either a subscription key from Microsoft Cognitive Services in the Azure Portal. You can find instructions at <a href="http://docs.microsofttranslator.com/text-translate.html">http://docs.microsofttranslator.com/text-translate.html</a>. Please enter the subscription key in the field below.'); ?>
                     </p>
-                    <dt><label for="editsettingsform[ms_translator_clientid]"><?php echo _('Microsoft Translator API - Client ID'); ?></label></dt>
-                    <dd><input type="text" name="editsettingsform[ms_translator_clientid]" value="<?php echo htmlspecialchars($this->_settings->get('ms_translator_clientid'), ENT_QUOTES); ?>"></dd>
+                    <dt><label for="editsettingsform[ms_translator_subscriptionkey]"><?php echo _('Microsoft Cognitive Services - Subscription Key'); ?></label></dt>
+                    <dd><input type="text" name="editsettingsform[ms_translator_subscriptionkey]" value="<?php echo htmlspecialchars($this->_settings->get('ms_translator_subscriptionkey'), ENT_QUOTES); ?>"></dd>
 
-                    <dt><label for="editsettingsform[ms_translator_clientsecret]"><?php echo _('Microsoft Translator API - Secret ID'); ?></label></dt>
-                    <dd><input type="text" name="editsettingsform[ms_translator_clientsecret]" value="<?php echo htmlspecialchars($this->_settings->get('ms_translator_clientsecret'), ENT_QUOTES); ?>"></dd>
 				</dl>
 
 			</fieldset>
@@ -100,14 +106,16 @@ if ($tplHelper->allowed(SpotSecurity::spotsec_edit_settings, '')) { ?>
 					<dd><input type="password" name="editsettingsform[nntp_nzb][pass]" value="<?php echo htmlspecialchars($nntp_nzb['pass'], ENT_QUOTES); ?>"></dd>
 
 					<dt><label for="use_encryption_nzb"><?php echo _('Encryption'); ?></label></dt>
-					<dd><input type="checkbox" class="enabler" name="editsettingsform[nntp_nzb][enc][switch]" id="use_encryption_nzb" <?php if ($nntp_nzb['enc']) { echo 'checked="checked"'; } ?>></dd>
+					<dd><input type="checkbox" class="enabler" name="editsettingsform[nntp_nzb][enc][switch]" id="use_encryption_nzb" <?php if ($nntp_nzb['enc']) { echo 'checked="checked"'; } ?>>
 					<fieldset id="content_use_encryption_nzb">
 						<select name="editsettingsform[nntp_nzb][enc][select]">
 							<option <?php if ($nntp_nzb['enc'] == 'ssl') { echo 'selected="selected"'; } ?> value="ssl">SSL</option>
 							<option <?php if ($nntp_nzb['enc'] == 'tls') { echo 'selected="selected"'; } ?> value="tls">TLS</option>
 						</select>					
+     					<label for="editsettingsform[nntp_nzb][verifyname]"><?php echo '&nbsp;&nbsp;&nbsp'; echo _('Verify name (CN) on certificate'); ?></label>
+                        <input type="checkbox" name="editsettingsform[nntp_nzb][verifyname][switch]" style="vertical-align:bottom" id="use_verifyname_nzb" <?php if ($nntp_nzb['verifyname']) { echo 'checked="checked"'; } ?>>
 					</fieldset>
-
+                    </dd>
 					<dt><label for="editsettingsform[nntp_nzb][port]"><?php echo _('Port'); ?></label></dt>
 					<dd><input type="text" name="editsettingsform[nntp_nzb][port]" value="<?php echo htmlspecialchars($nntp_nzb['port'], ENT_QUOTES); ?>"></dd>
 
@@ -132,13 +140,16 @@ if ($tplHelper->allowed(SpotSecurity::spotsec_edit_settings, '')) { ?>
 					<dd><input type="password" name="editsettingsform[nntp_hdr][pass]" value="<?php echo htmlspecialchars($nntp_hdr['pass'], ENT_QUOTES); ?>"></dd>
 
 					<dt><label for="use_encryption_hdr"><?php echo _('Encryption'); ?></label></dt>
-					<dd><input type="checkbox" class="enabler" name="editsettingsform[nntp_hdr][enc][switch]" id="use_encryption_hdr" <?php if ($nntp_hdr['enc']) { echo 'checked="checked"'; } ?>></dd>
+					<dd><input type="checkbox" class="enabler" name="editsettingsform[nntp_hdr][enc][switch]" id="use_encryption_hdr" <?php if ($nntp_hdr['enc']) { echo 'checked="checked"'; } ?>>
 					<fieldset id="content_use_encryption_hdr">
 						<select name="editsettingsform[nntp_hdr][enc][select]">
 							<option <?php if ($nntp_hdr['enc'] == 'ssl') { echo 'selected="selected"'; } ?> value="ssl">SSL</option>
 							<option <?php if ($nntp_hdr['enc'] == 'tls') { echo 'selected="selected"'; } ?> value="tls">TLS</option>
 						</select>					
-					</fieldset>
+     					<label for="editsettingsform[nntp_hdr][verifyname]"><?php echo '&nbsp;&nbsp;&nbsp'; echo _('Verify name (CN) on certificate'); ?></label>
+                        <input type="checkbox" name="editsettingsform[nntp_hdr][verifyname][switch]" style="vertical-align:bottom" id="use_verifyname_hdr" <?php if ($nntp_hdr['verifyname']) { echo 'checked="checked"'; } ?>>
+                    </fieldset>
+                    </dd>
 
 					<dt><label for="editsettingsform[nntp_hdr][port]"><?php echo _('Port'); ?></label></dt>
 					<dd><input type="text" name="editsettingsform[nntp_hdr][port]" value="<?php echo htmlspecialchars($nntp_hdr['port'], ENT_QUOTES); ?>"></dd>
@@ -164,14 +175,16 @@ if ($tplHelper->allowed(SpotSecurity::spotsec_edit_settings, '')) { ?>
 					<dd><input type="password" name="editsettingsform[nntp_post][pass]" value="<?php echo htmlspecialchars($nntp_post['pass'], ENT_QUOTES); ?>"></dd>
 
 					<dt><label for="use_encryption_post"><?php echo _('Encryption'); ?></label></dt>
-					<dd><input type="checkbox" class="enabler" name="editsettingsform[nntp_post][enc][switch]" id="use_encryption_post" <?php if ($nntp_post['enc']) { echo 'checked="checked"'; } ?>></dd>
+					<dd><input type="checkbox" class="enabler" name="editsettingsform[nntp_post][enc][switch]" id="use_encryption_post" <?php if ($nntp_post['enc']) { echo 'checked="checked"'; } ?>>
 					<fieldset id="content_use_encryption_post">
 						<select name="editsettingsform[nntp_post][enc][select]">
 							<option <?php if ($nntp_post['enc'] == 'ssl') { echo 'selected="selected"'; } ?> value="ssl">SSL</option>
 							<option <?php if ($nntp_post['enc'] == 'tls') { echo 'selected="selected"'; } ?> value="tls">TLS</option>
 						</select>					
+     					<label for="editsettingsform[nntp_post][verifyname]"><?php echo '&nbsp;&nbsp;&nbsp'; echo _('Verify name (CN) on certificate'); ?></label>
+                        <input type="checkbox" name="editsettingsform[nntp_post][verifyname][switch]" style="vertical-align:bottom" id="use_verifyname_post" <?php if ($nntp_post['verifyname']) { echo 'checked="checked"'; } ?>>
 					</fieldset>
-
+                     </dd>
 					<dt><label for="editsettingsform[nntp_post][port]"><?php echo _('Port'); ?></label></dt>
 					<dd><input type="text" name="editsettingsform[nntp_post][port]" value="<?php echo htmlspecialchars($nntp_post['port'], ENT_QUOTES); ?>"></dd>
 
@@ -240,6 +253,12 @@ if ($tplHelper->allowed(SpotSecurity::spotsec_edit_settings, '')) { ?>
 					<dt><label for="editsettingsform[imageover_subcats]"><?php echo _('Enable imagepreview in spot overview'); ?></label></dt>
 					<dd><input type="checkbox" name="editsettingsform[imageover_subcats]" <?php if ($this->_settings->get('imageover_subcats')) { echo 'checked="checked"'; } ?>></dd>
 
+					<dt><label for="editsettingsform[highlight]"><?php echo _('Highlight spots based on amount of comments'); ?></label></dt>
+					<dd><input type="checkbox" name="editsettingsform[highlight]" <?php if ($this->_settings->get('highlight')) { echo 'checked="checked"'; } ?>></dd>
+					
+					<dt><label for="editsettingsform[highcount]"><?php echo _('Amount of comments to highlight spot'); ?></label></dt>
+					<dd><input type="text" name="editsettingsform[highcount]" value="<?php echo htmlspecialchars($this->_settings->get('highcount'), ENT_QUOTES); ?>"></dd>
+					
 					<dt><label for="editsettingsform[prepare_statistics]"><?php echo _('Prepare statistics during retrieve'); ?></label></dt>
 					<dd><input type="checkbox" name="editsettingsform[prepare_statistics]" <?php if ($this->_settings->get('prepare_statistics')) { echo 'checked="checked"'; } ?>></dd>
 

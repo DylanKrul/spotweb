@@ -14,6 +14,9 @@ div.container.hidden {position:absolute; top:0; bottom:0; left:0; right:0; overf
 input {outline:none;}
 div.clear {clear:both;}
 
+/* Option to change color setting of highlighted spots based on comments: eg #09ba09 */
+.hg1	{ background-color: #edfeed !important; }
+
 /* TOOLBAR */
 div#toolbar {background:url(../img/sprite_x.png) repeat-x 0 -80px; height:25px;}
 body.fixed div#toolbar {top:0; left:0; right:0; position:fixed; z-index:3;}
@@ -279,7 +282,7 @@ table.spots td.genre,
 table.spots th.genre {min-width:120px; width:120px;}
 table.spots td.poster,
 table.spots th.poster {min-width:110px; width:110px; overflow:hidden;}
-table.spots td.poster a {width:110px;}
+table.spots td.poster a {width:115px;}
 table.spots td.date,
 table.spots th.date {min-width:140px; width:140px;}
 table.spots td.filesize,

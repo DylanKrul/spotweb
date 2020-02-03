@@ -18,9 +18,31 @@ class SpotStruct_sqlite extends SpotStruct_abs {
 		$this->_dbcon->rawExec("ANALYZE filtercounts");
 		$this->_dbcon->rawExec("ANALYZE users");
 		$this->_dbcon->rawExec("ANALYZE cache");
-        $this->_dbcon->rawExec("ANALYZE moderatedringbuffer");
-        $this->_dbcon->rawExec("ANALYZE usenetstate");
+        	$this->_dbcon->rawExec("ANALYZE moderatedringbuffer");
+        	$this->_dbcon->rawExec("ANALYZE usenetstate");
 	} # analyze
+	
+	function resetdb() { 		
+		$this->_dbcon->rawExec("PRAGMA FOREIGN_KEYS = OFF");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spots");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotsposted");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotsfull");
+		$this->_dbcon->rawExec("TRUNCATE TABLE commentsxover");
+		$this->_dbcon->rawExec("TRUNCATE TABLE commentsfull");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotstatelist");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotteridblacklist");
+		$this->_dbcon->rawExec("TRUNCATE TABLE filtercounts");	
+		$this->_dbcon->rawExec("TRUNCATE TABLE reportsposted");
+		$this->_dbcon->rawExec("TRUNCATE TABLE reportsxover");
+		$this->_dbcon->rawExec("TRUNCATE TABLE cache");
+        	$this->_dbcon->rawExec("TRUNCATE TABLE moderatedringbuffer");
+        	$this->_dbcon->rawExec("TRUNCATE TABLE usenetstate");
+		$this->_dbcon->rawExec("PRAGMA FOREIGN_KEYS = ON");
+	} # resetdb
+	
+	function clearcache() { 		
+		$this->_dbcon->rawExec("TRUNCATE TABLE cache");
+	} # clearcache
 
 	/*
 	 * Returns a database specific representation of a boolean value
@@ -40,9 +62,9 @@ class SpotStruct_sqlite extends SpotStruct_abs {
 	public function swDtToNative($colType) {
 		switch(strtoupper($colType)) {
 			case 'INTEGER'				: $colType = 'INTEGER'; break;
-			case 'UNSIGNED INTEGER'		: $colType = 'INTEGER'; break;
+			case 'INTEGER UNSIGNED'		: $colType = 'INTEGER'; break;
 			case 'BIGINTEGER'			: $colType = 'BIGINT'; break;
-			case 'UNSIGNED BIGINTEGER'	: $colType = 'BIGINT'; break;
+			case 'BIGINTEGER UNSIGNED'	: $colType = 'BIGINT'; break;
 			case 'BOOLEAN'				: $colType = 'BOOLEAN'; break;
 			case 'MEDIUMBLOB'			: $colType = 'BLOB'; break;
 		} # switch
@@ -110,16 +132,14 @@ class SpotStruct_sqlite extends SpotStruct_abs {
 		$this->_dbcon->rawExec("DROP TRIGGER IF EXISTS " . $ftsname . "_insert");
 		
 		# and recreate the virtual table and link the update trigger to it
-		$this->_dbcon->rawExec("CREATE VIRTUAL TABLE " . $ftsname . " USING FTS4(CONTENT='spots'," . implode(',', $colList) . ", matchinfo=fts3)");
+		$this->_dbcon->rawExec("CREATE VIRTUAL TABLE " . $ftsname . " USING FTS5(CONTENT='spots'," . implode(',', $colList) . ", columnsize=0)");
 
 		$this->_dbcon->rawExec("INSERT INTO " . $ftsname . "(rowid, " . implode(',', $colList) . ") SELECT rowid," . implode(',', $colList) . " FROM " . $tablename);
-		$this->_dbcon->rawExec("CREATE TRIGGER " . $ftsname . "_insert AFTER INSERT ON " . $tablename . " FOR EACH ROW
-								BEGIN
+		$this->_dbcon->rawExec("CREATE TRIGGER " . $ftsname . "_insert AFTER INSERT ON " . $tablename . " BEGIN
 								   INSERT INTO " . $ftsname . "(rowid," . implode(',', $colList) . ") VALUES (new.rowid, new." . implode(', new.', $colList) . ");
 								END");
-		$this->_dbcon->rawExec("CREATE TRIGGER " . $ftsname . "_delete AFTER DELETE ON " . $tablename . " FOR EACH ROW
-								BEGIN
-								   DELETE FROM " . $ftsname . " WHERE rowid=old.rowid;
+		$this->_dbcon->rawExec("CREATE TRIGGER " . $ftsname . "_delete AFTER DELETE ON " . $tablename . " BEGIN
+								   INSERT INTO " . $ftsname . "(" . $ftsname . ",rowid," . implode(',', $colList) . ") VALUES('delete', old.rowid, old." . implode(', old.', $colList) . ");
 								END");
 	} # createFts
 	

@@ -308,6 +308,9 @@ if (!$dialogembedded) { ?>
 						<dt><label for="edituserprefsform[nzbhandling][nzbget][host]"><?php echo _('Hostname of nzbget?'); ?></label></dt>
 						<dd><input type="input" name="edituserprefsform[nzbhandling][nzbget][host]" value="<?php echo htmlspecialchars($edituserprefsform['nzbhandling']['nzbget']['host']); ?>"></dd>
 
+						<dt><label for="edituserprefsform[nzbhandling][nzbget][ssl]"><?php echo _('Use SSL?'); ?></label></dt>
+						<dd><input type="checkbox" class="enabler" name="edituserprefsform[nzbhandling][nzbget][ssl]" id="use_ssl" <?php if ($edituserprefsform['nzbhandling']['nzbget']['ssl']) { echo 'checked="checked"'; } ?>></dd>
+						
 						<dt><label for="edituserprefsform[nzbhandling][nzbget][port]"><?php echo _('Portnumber of nzbget?'); ?></label></dt>
 						<dd><input type="input" name="edituserprefsform[nzbhandling][nzbget][port]" value="<?php echo htmlspecialchars($edituserprefsform['nzbhandling']['nzbget']['port']); ?>"></dd>
 
@@ -397,24 +400,6 @@ if (!$dialogembedded) { ?>
 					<dd><input type="text" name="edituserprefsform[notifications][nma][api]" value="<?php echo htmlspecialchars($edituserprefsform['notifications']['nma']['api']); ?>"></dd>
 
 					<?php showNotificationOptions('nma', $edituserprefsform, $tplHelper); ?>
-				</fieldset>
-			</fieldset>
-<?php } ?>
-
-<?php if ($tplHelper->allowed(SpotSecurity::spotsec_send_notifications_services, 'notifo')) { ?>
-<!-- Notifo -->
-			<fieldset>
-				<dt><label for="use_notifo"><?php echo _('Use Notifo?'); ?></label></dt>
-				<dd><input type="checkbox" class="enabler" name="edituserprefsform[notifications][notifo][enabled]" id="use_notifo" <?php if ($edituserprefsform['notifications']['notifo']['enabled']) { echo 'checked="checked"'; } ?>></dd>
-
-				<fieldset id="content_use_notifo" class="notificationSettings">
-					<dt><label for="edituserprefsform[notifications][notifo][username]"><?php echo _('Notifo Username?'); ?></label></dt>
-					<dd><input type="input" name="edituserprefsform[notifications][notifo][username]" value="<?php echo htmlspecialchars($edituserprefsform['notifications']['notifo']['username']); ?>"></dd>
-
-					<dt><label for="edituserprefsform[notifications][notifo][api]"><?php echo _('Notifo <a href="http://notifo.com/user/settings">API secret</a>?'); ?></label></dt>
-					<dd><input type="text" name="edituserprefsform[notifications][notifo][api]" value="<?php echo htmlspecialchars($edituserprefsform['notifications']['notifo']['api']); ?>"></dd>
-
-					<?php showNotificationOptions('notifo', $edituserprefsform, $tplHelper); ?>
 				</fieldset>
 			</fieldset>
 <?php } ?>

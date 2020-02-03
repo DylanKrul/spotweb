@@ -18,9 +18,29 @@ class SpotStruct_pgsql extends SpotStruct_abs {
 		$this->_dbcon->rawExec("VACUUM ANALYZE spotstatelist");
 		$this->_dbcon->rawExec("VACUUM ANALYZE users");
 		$this->_dbcon->rawExec("VACUUM ANALYZE cache");
-        $this->_dbcon->rawExec("VACUUM ANALYZE moderatedringbuffer");
-        $this->_dbcon->rawExec("VACUUM ANALYZE usenetstate");
+        	$this->_dbcon->rawExec("VACUUM ANALYZE moderatedringbuffer");
+        	$this->_dbcon->rawExec("VACUUM ANALYZE usenetstate");
 	} # analyze
+
+	function resetdb() { 		
+        	$this->_dbcon->rawExec("TRUNCATE TABLE spotsposted CASCADE");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotsfull CASCADE");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotstatelist CASCADE");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spots CASCADE");
+		$this->_dbcon->rawExec("TRUNCATE TABLE commentsfull CASCADE");
+		$this->_dbcon->rawExec("TRUNCATE TABLE commentsxover CASCADE");
+		$this->_dbcon->rawExec("TRUNCATE TABLE spotteridblacklist CASCADE");
+		$this->_dbcon->rawExec("TRUNCATE TABLE filtercounts CASCADE");	
+		$this->_dbcon->rawExec("TRUNCATE TABLE reportsposted CASCADE");
+		$this->_dbcon->rawExec("TRUNCATE TABLE reportsxover CASCADE");
+		$this->_dbcon->rawExec("TRUNCATE TABLE cache");
+        	$this->_dbcon->rawExec("TRUNCATE TABLE moderatedringbuffer CASCADE");
+        	$this->_dbcon->rawExec("TRUNCATE TABLE usenetstate CASCADE");
+	} # resetdb
+	
+	function clearcache() { 		
+		$this->_dbcon->rawExec("TRUNCATE TABLE cache");
+	} # clearcache
 
     /*
      * Returns a database specific representation of a boolean value
@@ -40,9 +60,9 @@ class SpotStruct_pgsql extends SpotStruct_abs {
 	function swDtToNative($colType) {
 		switch(strtoupper($colType)) {
 			case 'INTEGER'				: $colType = 'integer'; break;
-			case 'UNSIGNED INTEGER'		: $colType = 'bigint'; break;
+			case 'INTEGER UNSIGNED'		: $colType = 'bigint'; break;
 			case 'BIGINTEGER'			: $colType = 'bigint'; break;
-			case 'UNSIGNED BIGINTEGER'	: $colType = 'bigint'; break;
+			case 'BIGINTEGER UNSIGNED'	: $colType = 'bigint'; break;
 			case 'BOOLEAN'				: $colType = 'boolean'; break;
 			case 'MEDIUMBLOB'			: $colType = 'bytea'; break;
 		} # switch

@@ -15,7 +15,10 @@ $.address.init(function() {
 			} else if ($.address.value() != '/') openSpot($('table.spots tr.active a.spotlink'), $.address.value());
 		});
 
-function initSpotwebJs() {
+var BaseURL = createBaseURL();
+var loading = '<img src="' + BaseURL + 'templates/we1rdo/img/loading.gif" height="16" width="16" />';
+
+function initSpotwebJs(BetweenText, AndText) {
 	//ready
 	$("a.spotlink").click(function(e) { e.preventDefault(); });
 	if(navigator.userAgent.toLowerCase().indexOf('chrome')>-1)$('a.spotlink').mouseup(function(e){if(e.which==2||(e.metaKey||e.ctrlKey)&&e.which==1){$(this).attr('rel','address:');}});
@@ -26,17 +29,14 @@ function initSpotwebJs() {
      */
     $('.showTipTip a.spotlink').each(applyTipTip);
 
-
     attachInfiniteScroll();
     attachKeyBindings();
     attachSidebarBehaviour();
     attachSidebarVisibility();
-    attachAdvancedSearchBehaviour();
+    attachAdvancedSearchBehaviour(BetweenText, AndText);
     attachFilterVisibility();
     attachMaintenanceButtonsBehaviour();
 
-    var BaseURL = createBaseURL();
-    var loading = '<img src="'+BaseURL+'templates/we1rdo/img/loading.gif" height="16" width="16" />';
     attachEnablerBehaviour();
 } // initSpotwebJs
 
@@ -608,7 +608,7 @@ function toggleSidebarItem(id) {
 }
 
 // Geavanceerd zoeken op juiste moment zichtbaar / onzichtbaar maken
-function attachAdvancedSearchBehaviour() {
+function attachAdvancedSearchBehaviour(BetweenText, AndText) {
 // console.time("7th-ready");
 	//ready
 	$("input.searchbox").focus(function(){
@@ -618,7 +618,7 @@ function attachAdvancedSearchBehaviour() {
 
             if (!$('div#tree').data('dynatree')) {
                 attachDateSortBehaviour();
-                initSliders();
+                initSliders(BetweenText, AndText);
                 initializeCategoryTree();
 
                 $("input[name='search[unfiltered]']").prop('checked') ? $("div#tree").hide() : $("div#tree").show();
@@ -1344,7 +1344,7 @@ function findNearest(possibleValues, realValues, includeLeft, includeRight, valu
     return [nearest, realValue];
 }
 
-function initSliders() {
+function initSliders(BetweenText, AndText) {
     var _1MB = 1024 * 1024;
     var _1GB = 1024 * 1024 * 1024;
 
@@ -1389,7 +1389,7 @@ function initSliders() {
                 sliderMaxFileSize = fixedValues[1];
             } // else
 
-            $( "#human-filesize" ).text( "Tussen " + format_size( parseInt($( "#min-filesize").val().substring("filesize:>:DEF:".length)) ) + " en " + format_size( parseInt($( "#max-filesize").val().substring("filesize:>:DEF:".length) )) );
+            $( "#human-filesize" ).text( BetweenText + format_size( parseInt($( "#min-filesize").val().substring("filesize:>:DEF:".length)) ) + AndText + format_size( parseInt($( "#max-filesize").val().substring("filesize:>:DEF:".length) )) );
 
             return false;
             }
@@ -1418,7 +1418,7 @@ function initSliders() {
     var nearestMax = findNearest(possibleValues, realValues, false, true, convertedSliderMaxFileSize);
     $( "#min-filesize" ).val( "filesize:>:DEF:" + nearestMin[1]);
     $( "#max-filesize" ).val( "filesize:<:DEF:" + nearestMax[1]);
-    $( "#human-filesize" ).text( "Tussen " + format_size( parseInt($( "#min-filesize").val().substring("filesize:>:DEF:".length)) ) + " en " + format_size( parseInt($( "#max-filesize").val().substring("filesize:>:DEF:".length) )) );
+    $( "#human-filesize" ).text(BetweenText + format_size( parseInt($( "#min-filesize").val().substring("filesize:>:DEF:".length)) ) + AndText + format_size( parseInt($( "#max-filesize").val().substring("filesize:>:DEF:".length) )) );
 
     /* Report counts */
     var reportSlideValue = $( "#slider-reportcount" ).slider("values", 0);
